@@ -36,7 +36,7 @@ function App() {
     }
 
     return (
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
             <Layout>
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
