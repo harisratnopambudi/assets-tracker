@@ -1,0 +1,51 @@
+import React, { useState } from 'react';
+import Layout from './components/Layout/Layout';
+import { AssetProvider } from './context/AssetContext';
+import Dashboard from './components/Dashboard/Dashboard';
+import MemberDetail from './components/MemberView/MemberDetail';
+
+function App() {
+  const [view, setView] = useState({ name: 'dashboard', data: null });
+
+  const handleSelectMember = (memberId) => {
+    setView({ name: 'member-detail', data: memberId });
+  };
+
+  const handleBack = () => {
+    setView({ name: 'dashboard', data: null });
+  };
+
+  return (
+    <AssetProvider>
+      <Layout>
+        <header className="glass-panel" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div onClick={handleBack} style={{ cursor: 'pointer', userSelect: 'none' }}>
+            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }} className="text-gradient">
+              Family Asset Tracker
+            </h1>
+            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+              Financial Overview & Wealth Management
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button className="glass-panel" style={{ padding: '8px 16px', fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+              Settings
+            </button>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-highlight)', border: '2px solid var(--primary-accent)' }}></div>
+          </div>
+        </header>
+
+        <main>
+          {view.name === 'dashboard' ? (
+            <Dashboard onSelectMember={handleSelectMember} />
+          ) : (
+            <MemberDetail memberId={view.data} onBack={handleBack} />
+          )}
+        </main>
+      </Layout>
+    </AssetProvider>
+  );
+}
+
+export default App;
