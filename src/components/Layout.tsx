@@ -36,6 +36,7 @@ const MEMBER_COLORS = [
 
 export default function Layout({ children }: LayoutProps) {
     const location = useLocation();
+    const [isMemberDrawerOpen, setIsMemberDrawerOpen] = useState(false);
     const members = useStore((state) => state.members);
 
     const navigation = [
@@ -142,6 +143,7 @@ export default function Layout({ children }: LayoutProps) {
                             <Link
                                 key={item.name}
                                 to={item.href}
+                                onClick={() => setIsMemberDrawerOpen(false)}
                                 className={`
                                     flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[64px]
                                     ${active ? 'text-primary-600' : 'text-gray-400 hover:bg-gray-50'}
@@ -155,38 +157,23 @@ export default function Layout({ children }: LayoutProps) {
                         );
                     })}
 
-                    {/* Mobile Menu Member Button (Optional - or just list them?) */}
-                    {/* For now, let's keep it simple and maybe add a distinct "Members" tab if needed, 
-                        BUT user data shows members are accessed via sidebar. 
-                        Let's standardise: Dashboard | Assets | ... Members? 
-                        
-                        Currently, there's no page for "All Members" list except the sidebar.
-                        To make it robust, let's add a simple Dropdown or Drawer trigger for members in the bottom nav 
-                        OR just list them in a "Members" page.
-                        
-                        Given time constraints, let's add a "Members" trigger that opens a simple bottom sheet/modal?
-                        Actually, let's just make the Bottom Nav: Dashboard | Aset | Anggota (opens drawer)
-                    */}
                     <button
-                        onClick={() => {
-                            // Temporary simple alert or separate logic? 
-                            // Better: Re-use the drawer logic just for members?
-                            // Let's implement a "Members" tab that effectively toggles a Members List Drawer.
-                            const drawer = document.getElementById('mobile-members-drawer');
-                            if (drawer) drawer.classList.remove('translate-y-full');
-                        }}
-                        className="flex flex-col items-center justify-center p-2 rounded-xl text-gray-400 hover:bg-gray-50 min-w-[64px]"
+                        onClick={() => setIsMemberDrawerOpen(!isMemberDrawerOpen)}
+                        className={`
+                            flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[64px]
+                            ${isMemberDrawerOpen ? 'text-primary-600' : 'text-gray-400 hover:bg-gray-50'}
+                        `}
                     >
-                        <div className="p-1.5 rounded-full mb-1">
-                            <Users className="w-6 h-6" />
+                        <div className={`p-1.5 rounded-full mb-1 ${isMemberDrawerOpen ? 'bg-primary-50' : ''}`}>
+                            <Users className={`w-6 h-6 ${isMemberDrawerOpen ? 'text-primary-600' : 'text-gray-400'}`} />
                         </div>
                         <span className="text-[10px] font-medium">Anggota</span>
                     </button>
 
                     <Link
-                        to="/profile" // Assuming profile/settings placeholder
+                        to="/profile"
+                        onClick={() => setIsMemberDrawerOpen(false)}
                         className="flex flex-col items-center justify-center p-2 rounded-xl text-gray-400 hover:bg-gray-50 min-w-[64px]"
-                        onClick={(e) => e.preventDefault()} // Placeholder
                     >
                         <div className="p-1.5 rounded-full mb-1">
                             <User className="w-6 h-6" />
@@ -196,16 +183,26 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
             </div>
 
-            {/* Mobile Members Drawer */}
+            {/* Mobile Members Drawer - Backdrop & Drawer */}
+            {isMemberDrawerOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+                    onClick={() => setIsMemberDrawerOpen(false)}
+                />
+            )}
+
             <div
-                id="mobile-members-drawer"
-                className="lg:hidden fixed inset-x-0 bottom-[calc(60px+env(safe-area-inset-bottom))] z-40 bg-white rounded-t-2xl shadow-xl transform translate-y-full transition-transform duration-300 border-t border-gray-100"
+                className={`
+                    lg:hidden fixed inset-x-0 bottom-[calc(60px+env(safe-area-inset-bottom))] z-40 bg-white rounded-t-2xl shadow-xl 
+                    transform transition-transform duration-300 border-t border-gray-100
+                    ${isMemberDrawerOpen ? 'translate-y-0' : 'translate-y-[150%]'}
+                `}
                 style={{ maxHeight: '70vh' }}
             >
                 {/* Drag Handle */}
                 <div
                     className="flex justify-center pt-3 pb-1"
-                    onClick={() => document.getElementById('mobile-members-drawer')?.classList.add('translate-y-full')}
+                    onClick={() => setIsMemberDrawerOpen(false)}
                 >
                     <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
                 </div>
@@ -219,7 +216,7 @@ export default function Layout({ children }: LayoutProps) {
                                 <Link
                                     key={member.id}
                                     to={`/member/${member.id}`}
-                                    onClick={() => document.getElementById('mobile-members-drawer')?.classList.add('translate-y-full')}
+                                    onClick={() => setIsMemberDrawerOpen(false)}
                                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
                                 >
                                     <div className={`w-10 h-10 rounded-full ${colorClass} flex items-center justify-center text-white font-semibold`}>
@@ -235,10 +232,6 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
                 </div>
             </div>
-
-            {/* Backdrop for Drawer - simpler approach: Click outside to close (handled by invisible div) 
-               Actually, for simplicity in this turn, I'll just use the handle to close or link click.
-            */}
 
             {/* Main Content */}
             <main className="lg:pl-72 min-h-screen pb-24 lg:pb-8 pt-4 lg:pt-0">
